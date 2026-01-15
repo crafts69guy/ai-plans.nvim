@@ -39,3 +39,5 @@ vendor/
 # Debug
 debug/
 *.log
+
+.claude/
