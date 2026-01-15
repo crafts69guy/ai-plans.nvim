@@ -14,14 +14,15 @@ M.gen_from_file = function(opts)
 	local config = require("telescope._extensions.ai_plans.config")
 	local show_title = opts.show_title ~= nil and opts.show_title or config.values.show_title
 
-	-- Create display layout
+	-- Create display layout with fixed widths for single-row rendering
 	local displayer = entry_display.create({
 		separator = " ",
 		items = {
+			{ width = 10 }, -- Source name [Claude]
 			{ width = 2 }, -- Source icon
+			{ width = 50 }, -- Filename/Title (fixed width, truncated if needed)
 			{ width = 16 }, -- Date
 			{ width = 7 }, -- Size
-			{ remaining = true }, -- Filename/Title
 		},
 	})
 
@@ -29,16 +30,18 @@ M.gen_from_file = function(opts)
 	---@param entry table Entry to format
 	---@return table Display items
 	local make_display = function(entry)
+		local source_name = entry.source_config and entry.source_config.display_name or entry.source or "Unknown"
 		local source_icon = entry.source_config and entry.source_config.icon or ""
+		local display_name = entry.title or entry.filename
 		local mtime = ap_utils.format_time(entry.mtime or 0)
 		local size = ap_utils.format_size(entry.size or 0)
-		local display_name = entry.title or entry.filename
 
 		return displayer({
-			{ source_icon, "TelescopeResultsComment" },
+			{ "[" .. source_name .. "]", "TelescopeResultsComment" },
+			{ source_icon, "TelescopeResultsSpecialComment" },
+			{ display_name, "TelescopeResultsIdentifier" },
 			{ mtime, "TelescopeResultsNumber" },
 			{ size, "TelescopeResultsConstant" },
-			{ display_name, "TelescopeResultsIdentifier" },
 		})
 	end
 
