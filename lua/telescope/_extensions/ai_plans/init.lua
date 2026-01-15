@@ -7,6 +7,7 @@ local actions = require("telescope.actions")
 
 local ap_finders = require("telescope._extensions.ai_plans.finders")
 local ap_config = require("telescope._extensions.ai_plans.config")
+local ap_previewers = require("telescope._extensions.ai_plans.previewers")
 
 local M = {}
 
@@ -34,7 +35,7 @@ M.ai_plans = function(opts)
 			results_title = opts.results_title or "Plans",
 			finder = ap_finders.finder(opts),
 			sorter = conf.generic_sorter(opts),
-			previewer = conf.file_previewer(opts),
+			previewer = ap_previewers.previewer(opts),
 			initial_mode = opts.initial_mode or "normal",
 			attach_mappings = function(prompt_bufnr, map)
 				-- Apply mappings from config
