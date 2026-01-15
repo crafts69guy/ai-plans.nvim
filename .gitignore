@@ -1,0 +1,41 @@
+# Neovim
+*.swp
+*.swo
+*~
+tags
+
+# Lua
+*.luac
+lua_modules/
+.luarocks/
+
+# Testing
+.tests/
+test/fixtures/tmp/
+
+# Documentation build
+doc/tags
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/Editor
+.idea/
+.vscode/
+*.sublime-*
+.project
+.settings/
+
+# Local development
+.local/
+.env
+.envrc
+
+# Dependencies (if using any package manager)
+node_modules/
+vendor/
+
+# Debug
+debug/
+*.log
