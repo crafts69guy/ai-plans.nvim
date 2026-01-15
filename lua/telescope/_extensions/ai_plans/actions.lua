@@ -57,40 +57,62 @@ M.delete_files = function(prompt_bufnr)
 		return
 	end
 
-	-- Build confirmation message
-	local file_names = {}
+	-- Build file list for display
+	local file_lines = {}
 	for _, entry in ipairs(entries) do
-		table.insert(file_names, vim.fn.fnamemodify(entry.path or entry.value, ":t"))
+		local name = vim.fn.fnamemodify(entry.path or entry.value, ":t")
+		table.insert(file_lines, "  • " .. name)
 	end
 
-	local msg = string.format("Delete %d file(s)?\n%s", #entries, table.concat(file_names, "\n"))
+	-- Show max 5 files, then summarize the rest
+	local display_lines = {}
+	local max_display = 5
+	for i, line in ipairs(file_lines) do
+		if i <= max_display then
+			table.insert(display_lines, line)
+		end
+	end
+	if #file_lines > max_display then
+		table.insert(display_lines, string.format("  ... and %d more", #file_lines - max_display))
+	end
 
-	vim.ui.select({ "Yes", "No" }, {
-		prompt = msg,
-	}, function(choice)
-		if choice == "Yes" then
-			local deleted = 0
-			for _, entry in ipairs(entries) do
-				local path = entry.path or entry.value
-				local ok, err = os.remove(path)
-				if ok then
-					deleted = deleted + 1
-				else
-					ap_utils.notify(string.format("Failed to delete %s: %s", path, tostring(err)), vim.log.levels.ERROR)
-				end
-			end
+	-- Display highlighted confirmation message
+	local echo_chunks = {
+		{ "\n" },
+		{ "  ⚠ Delete ", "WarningMsg" },
+		{ tostring(#entries), "Number" },
+		{ " file(s)?\n\n", "WarningMsg" },
+	}
+	for _, line in ipairs(display_lines) do
+		table.insert(echo_chunks, { line .. "\n", "Directory" })
+	end
+	table.insert(echo_chunks, { "\n" })
+	vim.api.nvim_echo(echo_chunks, false, {})
 
-			if deleted > 0 then
-				ap_utils.notify(string.format("Deleted %d file(s)", deleted))
-				-- Refresh the picker
-				local current_picker = action_state.get_current_picker(prompt_bufnr)
-				if current_picker then
-					local ap_finders = require("telescope._extensions.ai_plans.finders")
-					current_picker:refresh(ap_finders.finder({}), { reset_prompt = false })
-				end
+	local choice = vim.fn.confirm("Confirm deletion?", "&Yes\n&No", 2, "Warning")
+
+	if choice == 1 then -- User selected "Yes"
+		local deleted = 0
+		for _, entry in ipairs(entries) do
+			local path = entry.path or entry.value
+			local ok, err = os.remove(path)
+			if ok then
+				deleted = deleted + 1
+			else
+				ap_utils.notify(string.format("Failed to delete %s: %s", path, tostring(err)), vim.log.levels.ERROR)
 			end
 		end
-	end)
+
+		if deleted > 0 then
+			ap_utils.notify(string.format("Deleted %d file(s)", deleted))
+			-- Refresh the picker
+			local current_picker = action_state.get_current_picker(prompt_bufnr)
+			if current_picker then
+				local ap_finders = require("telescope._extensions.ai_plans.finders")
+				current_picker:refresh(ap_finders.finder({}), { reset_prompt = false })
+			end
+		end
+	end
 end
 
 --- Toggle selection and move to next entry
