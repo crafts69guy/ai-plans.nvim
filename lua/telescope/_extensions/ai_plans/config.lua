@@ -89,6 +89,7 @@ config.setup_mappings = function()
 			["<Tab>"] = ap_actions.toggle_selection_and_next,
 			["<S-Tab>"] = ap_actions.toggle_selection_and_prev,
 			["y"] = ap_actions.yank_paths,
+			["Y"] = ap_actions.yank_content,
 			["<BS>"] = ap_actions.delete_files,
 			["d"] = ap_actions.delete_files,
 			["<C-d>"] = actions.preview_scrolling_down,

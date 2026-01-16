@@ -48,6 +48,40 @@ M.yank_paths = function(prompt_bufnr)
 	ap_utils.notify(string.format("Yanked %d path(s) to clipboard", #paths))
 end
 
+--- Yank file content to clipboard (single file only)
+---@param prompt_bufnr number Telescope prompt buffer number
+M.yank_content = function(prompt_bufnr)
+	local entry = action_state.get_selected_entry()
+	if not entry then
+		ap_utils.notify("No file selected", vim.log.levels.WARN)
+		return
+	end
+
+	local path = entry.path or entry.value
+
+	-- Read file content
+	local file = io.open(path, "r")
+	if not file then
+		ap_utils.notify("Failed to read file: " .. path, vim.log.levels.ERROR)
+		return
+	end
+
+	local content = file:read("*a")
+	file:close()
+
+	if not content or content == "" then
+		ap_utils.notify("File is empty", vim.log.levels.WARN)
+		return
+	end
+
+	-- Yank to clipboard
+	vim.fn.setreg("+", content)
+	vim.fn.setreg('"', content)
+
+	actions.close(prompt_bufnr)
+	ap_utils.notify(string.format("Yanked content of %s to clipboard", vim.fn.fnamemodify(path, ":t")))
+end
+
 --- Delete selected files with confirmation
 ---@param prompt_bufnr number Telescope prompt buffer number
 M.delete_files = function(prompt_bufnr)
