@@ -81,6 +81,9 @@ M.grep = function(opts)
 	-- Get initial search pattern from opts
 	local initial_pattern = opts.default_text or opts.search or ""
 
+	-- Set initial_mode for grep picker (must be set before pickers.new due to merge behavior)
+	opts.initial_mode = opts.grep_initial_mode or "insert"
+
 	-- Create the grep picker with dynamic finder
 	pickers
 		.new(opts, {
@@ -91,7 +94,6 @@ M.grep = function(opts)
 			finder = initial_pattern ~= "" and ap_finders.grep_finder(initial_pattern, opts) or ap_finders.finder(opts),
 			sorter = conf.generic_sorter(opts),
 			previewer = ap_previewers.grep_previewer(opts),
-			initial_mode = opts.grep_initial_mode or "insert",
 			-- Dynamic finder update based on prompt changes
 			on_input_filter_cb = function(prompt)
 				if prompt == "" then
