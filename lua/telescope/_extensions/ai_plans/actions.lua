@@ -183,4 +183,55 @@ M.refresh = function(prompt_bufnr)
 	end
 end
 
+--- Open file at specific line (for grep results)
+---@param prompt_bufnr number Telescope prompt buffer number
+M.open_file_at_line = function(prompt_bufnr)
+	local entry = action_state.get_selected_entry()
+	if not entry then
+		return
+	end
+	actions.close(prompt_bufnr)
+
+	local path = entry.path or entry.value
+	local lnum = entry.lnum or 1
+	local col = entry.col or 1
+
+	vim.cmd("edit " .. vim.fn.fnameescape(path))
+	vim.api.nvim_win_set_cursor(0, { lnum, col - 1 })
+end
+
+--- Open file at line in horizontal split
+---@param prompt_bufnr number Telescope prompt buffer number
+M.open_at_line_split = function(prompt_bufnr)
+	local entry = action_state.get_selected_entry()
+	if not entry then
+		return
+	end
+	actions.close(prompt_bufnr)
+
+	local path = entry.path or entry.value
+	local lnum = entry.lnum or 1
+	local col = entry.col or 1
+
+	vim.cmd("split " .. vim.fn.fnameescape(path))
+	vim.api.nvim_win_set_cursor(0, { lnum, col - 1 })
+end
+
+--- Open file at line in vertical split
+---@param prompt_bufnr number Telescope prompt buffer number
+M.open_at_line_vsplit = function(prompt_bufnr)
+	local entry = action_state.get_selected_entry()
+	if not entry then
+		return
+	end
+	actions.close(prompt_bufnr)
+
+	local path = entry.path or entry.value
+	local lnum = entry.lnum or 1
+	local col = entry.col or 1
+
+	vim.cmd("vsplit " .. vim.fn.fnameescape(path))
+	vim.api.nvim_win_set_cursor(0, { lnum, col - 1 })
+end
+
 return transform_mod(M)

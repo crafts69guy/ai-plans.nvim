@@ -34,10 +34,34 @@ local ai_plans = function(opts)
 	ap_picker.ai_plans(popts)
 end
 
+--- Entry point for grep/content search picker
+---@param opts table|nil User options
+local grep = function(opts)
+	opts = opts or {}
+
+	-- Apply theme from config if set
+	local defaults = (function()
+		if ap_config.values.theme then
+			local theme_func = require("telescope.themes")["get_" .. ap_config.values.theme]
+			if theme_func then
+				return theme_func(ap_config.values)
+			end
+		end
+		return vim.deepcopy(ap_config.values)
+	end)()
+
+	-- Merge user options
+	local popts = vim.tbl_deep_extend("force", defaults, opts)
+
+	-- Call the grep picker
+	ap_picker.grep(popts)
+end
+
 return telescope.register_extension({
 	setup = ap_config.setup,
 	exports = {
 		ai_plans = ai_plans,
+		grep = grep,
 		actions = ap_actions,
 		finders = ap_finders,
 		picker = ap_picker,

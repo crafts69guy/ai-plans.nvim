@@ -5,6 +5,7 @@ A Telescope extension for browsing, previewing, and managing AI-generated plan f
 ## Features
 
 - **Fuzzy search** through all AI plan markdown files
+- **Content search** - search inside plan files with ripgrep
 - **Preview pane** with syntax highlighting
 - **Multi-select** files with Tab
 - **Yank paths** to clipboard
@@ -23,6 +24,7 @@ A Telescope extension for browsing, previewing, and managing AI-generated plan f
 
 - [fd](https://github.com/sharkdp/fd) - faster file discovery
 - [bat](https://github.com/sharkdp/bat) - better preview highlighting
+- [ripgrep](https://github.com/BurntSushi/ripgrep) - faster content search
 
 ## Installation
 
@@ -86,9 +88,13 @@ use {
 ### Commands
 
 ```vim
-:Telescope ai_plans      " Open the picker
+:Telescope ai_plans      " Open the file browser
 :AiPlans                 " Alternative command
 :AiPlans claude          " Filter by source (if multiple configured)
+
+:Telescope ai_plans grep " Search content in plan files
+:AiPlansGrep             " Alternative command
+:AiPlansGrep pattern     " Search with initial pattern
 ```
 
 ### Default Keybindings
@@ -153,6 +159,7 @@ require("telescope").setup({
       -- External tools (auto-detected)
       use_fd = true,   -- Use fd for faster file discovery
       use_bat = true,  -- Use bat for preview if available
+      use_rg = true,   -- Use ripgrep for content search
 
       -- UI settings
       theme = "dropdown",  -- "dropdown", "ivy", "cursor", or nil
@@ -209,13 +216,21 @@ sources = {
 ### Lua API
 
 ```lua
--- Open picker
+-- Open file browser
 require("telescope").extensions.ai_plans.ai_plans()
 
 -- Open with custom options
 require("telescope").extensions.ai_plans.ai_plans({
   sort_by = "name",
   theme = "ivy",
+})
+
+-- Open content search (grep)
+require("telescope").extensions.ai_plans.grep()
+
+-- Grep with initial search pattern
+require("telescope").extensions.ai_plans.grep({
+  default_text = "implementation",
 })
 
 -- Access actions programmatically
@@ -227,6 +242,7 @@ local actions = require("telescope").extensions.ai_plans.actions
 ```lua
 local actions = require("telescope._extensions.ai_plans.actions")
 
+-- File browser actions
 actions.yank_paths(prompt_bufnr)           -- Yank paths to clipboard
 actions.delete_files(prompt_bufnr)         -- Delete with confirmation
 actions.toggle_selection_and_next(prompt_bufnr)
@@ -236,6 +252,11 @@ actions.open_in_split(prompt_bufnr)        -- Open in horizontal split
 actions.open_in_vsplit(prompt_bufnr)       -- Open in vertical split
 actions.open_in_tab(prompt_bufnr)          -- Open in new tab
 actions.refresh(prompt_bufnr)              -- Refresh file list
+
+-- Grep picker actions (open at matched line)
+actions.open_file_at_line(prompt_bufnr)    -- Open at matched line
+actions.open_at_line_split(prompt_bufnr)   -- Open in split at line
+actions.open_at_line_vsplit(prompt_bufnr)  -- Open in vsplit at line
 ```
 
 ## Integration with sidekick.nvim
@@ -245,6 +266,7 @@ If you use [sidekick.nvim](https://github.com/folke/sidekick.nvim), add a keybin
 ```lua
 keys = {
   { "<leader>aP", "<cmd>Telescope ai_plans<cr>", desc = "Browse AI Plans" },
+  { "<leader>aG", "<cmd>Telescope ai_plans grep<cr>", desc = "Search AI Plans" },
 }
 ```
 

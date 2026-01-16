@@ -18,6 +18,7 @@ local defaults = {
 	-- External tool preferences
 	use_fd = true, -- Use fd if available for file discovery
 	use_bat = true, -- Use bat for preview if available
+	use_rg = true, -- Use ripgrep for content search if available
 
 	-- UI settings
 	theme = nil, -- "dropdown", "ivy", "cursor", or nil for default
@@ -42,6 +43,9 @@ local defaults = {
 
 	-- Show markdown title in entry display
 	show_title = true,
+
+	-- Grep picker settings
+	grep_initial_mode = "insert", -- Initial mode for grep picker
 }
 
 -- Current configuration values (will be merged with user opts)

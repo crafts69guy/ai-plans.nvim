@@ -6,7 +6,7 @@ if vim.g.loaded_ai_plans then
 end
 vim.g.loaded_ai_plans = true
 
--- Create user command
+-- Create user command for browsing plans
 vim.api.nvim_create_user_command("AiPlans", function(opts)
 	require("telescope").extensions.ai_plans.ai_plans(opts.fargs[1] and { source = opts.fargs[1] } or {})
 end, {
@@ -23,4 +23,12 @@ end, {
 		end
 		return sources
 	end,
+})
+
+-- Create user command for searching plan content
+vim.api.nvim_create_user_command("AiPlansGrep", function(opts)
+	require("telescope").extensions.ai_plans.grep({ default_text = opts.args })
+end, {
+	nargs = "?",
+	desc = "Search AI Plans content",
 })
