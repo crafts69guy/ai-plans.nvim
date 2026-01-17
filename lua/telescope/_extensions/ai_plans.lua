@@ -10,6 +10,7 @@ local ap_config = require("telescope._extensions.ai_plans.config")
 local ap_actions = require("telescope._extensions.ai_plans.actions")
 local ap_finders = require("telescope._extensions.ai_plans.finders")
 local ap_picker = require("telescope._extensions.ai_plans.init")
+local ap_zen = require("telescope._extensions.ai_plans.zen")
 
 --- Main entry point for the ai_plans picker
 ---@param opts table|nil User options
@@ -65,5 +66,6 @@ return telescope.register_extension({
 		actions = ap_actions,
 		finders = ap_finders,
 		picker = ap_picker,
+		zen = ap_zen,
 	},
 })

@@ -46,6 +46,29 @@ local defaults = {
 
 	-- Grep picker settings
 	grep_initial_mode = "insert", -- Initial mode for grep picker
+
+	-- Zen popup settings
+	zen = {
+		enabled = true, -- Use zen popup by default for opening files
+		width_ratio = 0.8, -- Popup width as ratio of editor width
+		height_ratio = 0.8, -- Popup height as ratio of editor height
+		border = "rounded", -- Border style
+		title = true, -- Show filename in title
+		title_pos = "center", -- Title position: "left", "center", "right"
+		close_on_escape = true, -- Close with <Esc> in normal mode
+		close_on_q = true, -- Close with q in normal mode
+		prompt_save = true, -- Prompt to save if modified when closing
+		use_zen_mode = true, -- Use zen-mode.nvim if available
+		wo = { -- Window options for zen popup
+			wrap = true,
+			linebreak = true,
+			number = false,
+			relativenumber = false,
+			signcolumn = "no",
+			cursorline = false,
+			foldcolumn = "0",
+		},
+	},
 }
 
 -- Current configuration values (will be merged with user opts)
@@ -83,7 +106,7 @@ config.setup_mappings = function()
 			["<S-Tab>"] = ap_actions.toggle_selection_and_prev,
 			["<C-d>"] = actions.preview_scrolling_down,
 			["<C-u>"] = actions.preview_scrolling_up,
-			["<CR>"] = ap_actions.open_file,
+			["<CR>"] = ap_actions.smart_open,
 		},
 		["n"] = {
 			["<Tab>"] = ap_actions.toggle_selection_and_next,
@@ -94,13 +117,15 @@ config.setup_mappings = function()
 			["d"] = ap_actions.delete_files,
 			["<C-d>"] = actions.preview_scrolling_down,
 			["<C-u>"] = actions.preview_scrolling_up,
-			["<CR>"] = ap_actions.open_file,
+			["<CR>"] = ap_actions.smart_open,
 			["q"] = actions.close,
 			["<Esc>"] = actions.close,
 			["o"] = ap_actions.open_in_split,
 			["v"] = ap_actions.open_in_vsplit,
 			["t"] = ap_actions.open_in_tab,
 			["r"] = ap_actions.refresh,
+			["z"] = ap_actions.open_in_zen, -- Explicit zen open
+			["e"] = ap_actions.open_file, -- Explicit regular edit
 		},
 	}
 

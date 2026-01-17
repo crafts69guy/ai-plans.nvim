@@ -268,4 +268,56 @@ M.open_at_line_vsplit = function(prompt_bufnr)
 	vim.api.nvim_win_set_cursor(0, { lnum, col - 1 })
 end
 
+--- Open file in zen popup
+---@param prompt_bufnr number Telescope prompt buffer number
+M.open_in_zen = function(prompt_bufnr)
+	local entry = action_state.get_selected_entry()
+	if not entry then
+		return
+	end
+	actions.close(prompt_bufnr)
+
+	local ap_zen = require("telescope._extensions.ai_plans.zen")
+	ap_zen.open(entry.path or entry.value)
+end
+
+--- Open file at line in zen popup (for grep results)
+---@param prompt_bufnr number Telescope prompt buffer number
+M.open_in_zen_at_line = function(prompt_bufnr)
+	local entry = action_state.get_selected_entry()
+	if not entry then
+		return
+	end
+	actions.close(prompt_bufnr)
+
+	local ap_zen = require("telescope._extensions.ai_plans.zen")
+	ap_zen.open_at_line(entry.path or entry.value, entry.lnum or 1, entry.col or 1)
+end
+
+--- Smart open: uses zen if enabled, otherwise regular edit
+---@param prompt_bufnr number Telescope prompt buffer number
+M.smart_open = function(prompt_bufnr)
+	local config = require("telescope._extensions.ai_plans.config")
+	local zen_enabled = config.values.zen and config.values.zen.enabled
+
+	if zen_enabled then
+		M.open_in_zen(prompt_bufnr)
+	else
+		M.open_file(prompt_bufnr)
+	end
+end
+
+--- Smart open at line: uses zen if enabled, otherwise regular edit
+---@param prompt_bufnr number Telescope prompt buffer number
+M.smart_open_at_line = function(prompt_bufnr)
+	local config = require("telescope._extensions.ai_plans.config")
+	local zen_enabled = config.values.zen and config.values.zen.enabled
+
+	if zen_enabled then
+		M.open_in_zen_at_line(prompt_bufnr)
+	else
+		M.open_file_at_line(prompt_bufnr)
+	end
+end
+
 return transform_mod(M)

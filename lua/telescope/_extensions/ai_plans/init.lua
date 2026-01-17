@@ -52,7 +52,7 @@ M.ai_plans = function(opts)
 				-- Replace default select action
 				local ap_actions = require("telescope._extensions.ai_plans.actions")
 				actions.select_default:replace(function()
-					ap_actions.open_file(prompt_bufnr)
+					ap_actions.smart_open(prompt_bufnr)
 				end)
 
 				return true
@@ -128,9 +128,9 @@ M.grep = function(opts)
 				actions.select_default:replace(function()
 					local entry = require("telescope.actions.state").get_selected_entry()
 					if entry and entry.lnum then
-						ap_actions.open_file_at_line(prompt_bufnr)
+						ap_actions.smart_open_at_line(prompt_bufnr)
 					else
-						ap_actions.open_file(prompt_bufnr)
+						ap_actions.smart_open(prompt_bufnr)
 					end
 				end)
 
