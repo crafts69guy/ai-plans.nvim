@@ -124,7 +124,8 @@ config.setup_mappings = function()
 			["v"] = ap_actions.open_in_vsplit,
 			["t"] = ap_actions.open_in_tab,
 			["r"] = ap_actions.refresh,
-			["z"] = ap_actions.open_in_zen, -- Explicit zen open
+			["z"] = ap_actions.open_in_zen, -- Edit in zen popup
+			["Z"] = ap_actions.preview_in_zen, -- Preview in zen (read-only, rendered)
 			["e"] = ap_actions.open_file, -- Explicit regular edit
 		},
 	}

@@ -289,6 +289,127 @@ M.open = function(filepath, opts)
 	ap_utils.notify("Opened in zen mode (q or <Esc> to close)")
 end
 
+--- Try to enable render-markdown.nvim for the buffer
+---@param bufnr number Buffer number
+---@return boolean success True if render-markdown was enabled
+local function try_enable_render_markdown(bufnr)
+	local ok, render_md = pcall(require, "render-markdown")
+	if ok and render_md then
+		-- render-markdown.nvim should auto-attach to markdown buffers
+		-- but we can ensure it's enabled
+		pcall(function()
+			render_md.enable()
+		end)
+		return true
+	end
+	return false
+end
+
+--- Open a file in zen preview (read-only, rendered like Obsidian)
+---@param filepath string Path to the file
+---@param opts table|nil Configuration options
+M.preview = function(filepath, opts)
+	-- Close existing zen window if open
+	if M.is_open() then
+		M.close()
+	end
+
+	local config = require("telescope._extensions.ai_plans.config")
+	opts = vim.tbl_deep_extend("force", config.values.zen or {}, opts or {})
+
+	-- Store original window
+	zen_state.original_winid = vim.api.nvim_get_current_win()
+
+	-- Expand path
+	filepath = vim.fn.expand(filepath)
+
+	-- Create float options
+	local float_opts = create_float_opts(filepath, opts)
+
+	-- Add "Preview" indicator to title
+	if float_opts.title then
+		float_opts.title = " " .. vim.fn.fnamemodify(filepath, ":t") .. " [Preview] "
+	end
+
+	-- Create the floating window with a scratch buffer first
+	local scratch_buf = vim.api.nvim_create_buf(false, true)
+	zen_state.winid = vim.api.nvim_open_win(scratch_buf, true, float_opts)
+
+	-- Now edit the file in this window
+	vim.cmd("edit " .. vim.fn.fnameescape(filepath))
+	zen_state.bufnr = vim.api.nvim_get_current_buf()
+
+	-- Clean up scratch buffer if different
+	if scratch_buf ~= zen_state.bufnr and vim.api.nvim_buf_is_valid(scratch_buf) then
+		vim.api.nvim_buf_delete(scratch_buf, { force = true })
+	end
+
+	-- Set buffer as read-only
+	vim.bo[zen_state.bufnr].modifiable = false
+	vim.bo[zen_state.bufnr].readonly = true
+
+	-- Apply window options
+	apply_window_options(zen_state.winid, opts)
+
+	-- Setup keymaps (close only, no save prompt needed)
+	local keymap_opts = { buffer = zen_state.bufnr, noremap = true, silent = true }
+
+	-- Close on q (normal mode)
+	vim.keymap.set("n", "q", function()
+		-- Bypass save prompt for preview mode
+		if zen_state.winid and vim.api.nvim_win_is_valid(zen_state.winid) then
+			pcall(vim.api.nvim_win_close, zen_state.winid, true)
+		end
+		cleanup()
+	end, keymap_opts)
+
+	-- Close on <Esc> (normal mode)
+	vim.keymap.set("n", "<Esc>", function()
+		if zen_state.winid and vim.api.nvim_win_is_valid(zen_state.winid) then
+			pcall(vim.api.nvim_win_close, zen_state.winid, true)
+		end
+		cleanup()
+	end, keymap_opts)
+
+	-- Create autocmd group for cleanup
+	zen_state.autocmd_group = vim.api.nvim_create_augroup("AiPlansZenPreview", { clear = true })
+
+	-- Handle window close (external close or :q)
+	vim.api.nvim_create_autocmd("WinClosed", {
+		group = zen_state.autocmd_group,
+		pattern = tostring(zen_state.winid),
+		callback = function()
+			cleanup()
+		end,
+	})
+
+	-- Handle window resize
+	vim.api.nvim_create_autocmd("VimResized", {
+		group = zen_state.autocmd_group,
+		callback = function()
+			if M.is_open() then
+				local new_dims = calculate_dimensions(opts)
+				vim.api.nvim_win_set_config(zen_state.winid, {
+					relative = "editor",
+					width = new_dims.width,
+					height = new_dims.height,
+					row = new_dims.row,
+					col = new_dims.col,
+				})
+			end
+		end,
+	})
+
+	-- Try to enable render-markdown.nvim for nice rendering
+	vim.schedule(function()
+		if M.is_open() and zen_state.bufnr and vim.api.nvim_buf_is_valid(zen_state.bufnr) then
+			try_enable_render_markdown(zen_state.bufnr)
+		end
+	end)
+
+	ap_utils.notify("Preview mode (read-only, q or <Esc> to close)")
+end
+
 --- Open a file in the zen popup at a specific line
 ---@param filepath string Path to the file to open
 ---@param lnum number|nil Line number (1-based)

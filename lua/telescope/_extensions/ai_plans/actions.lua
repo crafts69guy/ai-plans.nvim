@@ -294,6 +294,19 @@ M.open_in_zen_at_line = function(prompt_bufnr)
 	ap_zen.open_at_line(entry.path or entry.value, entry.lnum or 1, entry.col or 1)
 end
 
+--- Preview file in zen popup (read-only, rendered like Obsidian)
+---@param prompt_bufnr number Telescope prompt buffer number
+M.preview_in_zen = function(prompt_bufnr)
+	local entry = action_state.get_selected_entry()
+	if not entry then
+		return
+	end
+	actions.close(prompt_bufnr)
+
+	local ap_zen = require("telescope._extensions.ai_plans.zen")
+	ap_zen.preview(entry.path or entry.value)
+end
+
 --- Smart open: uses zen if enabled, otherwise regular edit
 ---@param prompt_bufnr number Telescope prompt buffer number
 M.smart_open = function(prompt_bufnr)
