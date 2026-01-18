@@ -7,8 +7,9 @@ A Telescope extension for browsing, previewing, and managing AI-generated plan f
 - **Fuzzy search** through all AI plan markdown files
 - **Content search** - search inside plan files with ripgrep
 - **Preview pane** with syntax highlighting
+- **Zen mode** - distraction-free floating window for reading/editing plans
 - **Multi-select** files with Tab
-- **Yank paths** to clipboard
+- **Yank paths** or **yank content** to clipboard
 - **Delete files** with confirmation
 - **Configurable sources** - add Claude, ChatGPT, Gemini, or any custom paths
 - **Smart sorting** by modification time, name, or size
@@ -26,13 +27,18 @@ A Telescope extension for browsing, previewing, and managing AI-generated plan f
 - [bat](https://github.com/sharkdp/bat) - better preview highlighting
 - [ripgrep](https://github.com/BurntSushi/ripgrep) - faster content search
 
+### Optional (for enhanced zen mode)
+
+- [zen-mode.nvim](https://github.com/folke/zen-mode.nvim) - distraction-free environment
+- [render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim) - Obsidian-like markdown rendering in preview mode
+
 ## Installation
 
 ### Using [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
 {
-  "your-username/ai-plans.nvim",
+  "crafts69guy/ai-plans.nvim",
   dependencies = {
     "nvim-telescope/telescope.nvim",
     "nvim-lua/plenary.nvim",
@@ -63,7 +69,7 @@ A Telescope extension for browsing, previewing, and managing AI-generated plan f
 
 ```lua
 use {
-  "your-username/ai-plans.nvim",
+  "crafts69guy/ai-plans.nvim",
   requires = {
     "nvim-telescope/telescope.nvim",
     "nvim-lua/plenary.nvim",
@@ -101,30 +107,34 @@ use {
 
 #### In Normal Mode (inside picker)
 
-| Key            | Action                                    |
-| -------------- | ----------------------------------------- |
-| `<Tab>`        | Toggle selection and move to next         |
-| `<S-Tab>`      | Toggle selection and move to previous     |
-| `y`            | Yank selected file path(s) to clipboard   |
-| `<BS>` or `d`  | Delete selected file(s) with confirmation |
-| `<CR>`         | Open file in current window               |
-| `o`            | Open file in horizontal split             |
-| `v`            | Open file in vertical split               |
-| `t`            | Open file in new tab                      |
-| `<C-d>`        | Scroll preview down                       |
-| `<C-u>`        | Scroll preview up                         |
-| `r`            | Refresh the file list                     |
-| `q` or `<Esc>` | Close picker                              |
+| Key            | Action                                        |
+| -------------- | --------------------------------------------- |
+| `<Tab>`        | Toggle selection and move to next             |
+| `<S-Tab>`      | Toggle selection and move to previous         |
+| `y`            | Yank selected file path(s) to clipboard       |
+| `Y`            | Yank file content to clipboard (single file)  |
+| `<BS>` or `d`  | Delete selected file(s) with confirmation     |
+| `<CR>`         | Smart open (zen mode if enabled, else normal) |
+| `e`            | Open file in current window (bypass zen)      |
+| `z`            | Open file in zen mode (editable)              |
+| `Z`            | Preview file in zen mode (read-only)          |
+| `o`            | Open file in horizontal split                 |
+| `v`            | Open file in vertical split                   |
+| `t`            | Open file in new tab                          |
+| `<C-d>`        | Scroll preview down                           |
+| `<C-u>`        | Scroll preview up                             |
+| `r`            | Refresh the file list                         |
+| `q` or `<Esc>` | Close picker                                  |
 
 #### In Insert Mode (inside picker)
 
-| Key       | Action                                |
-| --------- | ------------------------------------- |
-| `<Tab>`   | Toggle selection and move to next     |
-| `<S-Tab>` | Toggle selection and move to previous |
-| `<C-d>`   | Scroll preview down                   |
-| `<C-u>`   | Scroll preview up                     |
-| `<CR>`    | Open file                             |
+| Key       | Action                                        |
+| --------- | --------------------------------------------- |
+| `<Tab>`   | Toggle selection and move to next             |
+| `<S-Tab>` | Toggle selection and move to previous         |
+| `<C-d>`   | Scroll preview down                           |
+| `<C-u>`   | Scroll preview up                             |
+| `<CR>`    | Smart open (zen mode if enabled, else normal) |
 
 ## Configuration
 
@@ -177,6 +187,29 @@ require("telescope").setup({
       -- Display
       show_title = true,  -- Extract and show markdown titles
 
+      -- Zen mode settings
+      zen = {
+        enabled = true,           -- Use zen mode by default when opening files
+        width_ratio = 0.8,        -- Popup width (80% of editor width)
+        height_ratio = 0.8,       -- Popup height (80% of editor height)
+        border = "rounded",       -- Border style: "rounded", "single", "double", etc.
+        title = true,             -- Show filename in window title
+        title_pos = "center",     -- Title position: "left", "center", "right"
+        close_on_escape = true,   -- Close zen window with <Esc> in normal mode
+        close_on_q = true,        -- Close zen window with q in normal mode
+        prompt_save = true,       -- Prompt to save changes before closing
+        use_zen_mode = true,      -- Integrate with zen-mode.nvim if available
+        wo = {                    -- Window options for better reading
+          wrap = true,
+          linebreak = true,
+          number = false,
+          relativenumber = false,
+          signcolumn = "no",
+          cursorline = false,
+          foldcolumn = "0",
+        },
+      },
+
       -- Custom mappings (optional - extends defaults)
       mappings = {
         n = {
@@ -211,6 +244,34 @@ sources = {
 }
 ```
 
+### Zen Mode
+
+Zen mode opens files in a distraction-free floating window. There are two modes:
+
+- **Edit mode** (`z` key) - Full editing with all your keybindings
+- **Preview mode** (`Z` key) - Read-only with rendered markdown (if render-markdown.nvim is installed)
+
+When `zen.enabled = true`, pressing `<CR>` uses zen mode by default. Use `e` to bypass zen and open normally.
+
+#### Disabling Zen Mode
+
+```lua
+zen = {
+  enabled = false,  -- <CR> opens files normally
+}
+```
+
+#### Customizing Zen Window
+
+```lua
+zen = {
+  width_ratio = 0.7,     -- Narrower window
+  height_ratio = 0.9,    -- Taller window
+  border = "double",     -- Different border style
+  title_pos = "left",    -- Title on the left
+}
+```
+
 ## API
 
 ### Lua API
@@ -233,8 +294,18 @@ require("telescope").extensions.ai_plans.grep({
   default_text = "implementation",
 })
 
+-- Open with zen mode disabled for this instance
+require("telescope").extensions.ai_plans.ai_plans({
+  zen = { enabled = false },
+})
+
 -- Access actions programmatically
 local actions = require("telescope").extensions.ai_plans.actions
+
+-- Access zen module for programmatic use
+local zen = require("telescope").extensions.ai_plans.zen
+zen.open("~/path/to/file.md")           -- Open in edit mode
+zen.open("~/path/to/file.md", true)     -- Open in preview mode
 ```
 
 ### Available Actions
@@ -244,14 +315,20 @@ local actions = require("telescope._extensions.ai_plans.actions")
 
 -- File browser actions
 actions.yank_paths(prompt_bufnr)           -- Yank paths to clipboard
+actions.yank_content(prompt_bufnr)         -- Yank file content to clipboard
 actions.delete_files(prompt_bufnr)         -- Delete with confirmation
 actions.toggle_selection_and_next(prompt_bufnr)
 actions.toggle_selection_and_prev(prompt_bufnr)
+actions.smart_open(prompt_bufnr)           -- Smart open (respects zen setting)
 actions.open_file(prompt_bufnr)            -- Open in current window
 actions.open_in_split(prompt_bufnr)        -- Open in horizontal split
 actions.open_in_vsplit(prompt_bufnr)       -- Open in vertical split
 actions.open_in_tab(prompt_bufnr)          -- Open in new tab
 actions.refresh(prompt_bufnr)              -- Refresh file list
+
+-- Zen mode actions
+actions.open_in_zen(prompt_bufnr)          -- Open in zen (editable)
+actions.preview_in_zen(prompt_bufnr)       -- Preview in zen (read-only)
 
 -- Grep picker actions (open at matched line)
 actions.open_file_at_line(prompt_bufnr)    -- Open at matched line
