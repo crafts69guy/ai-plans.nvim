@@ -372,7 +372,7 @@ keys = {
 
 ## License
 
-MIT
+[MIT](https://opensource.org/licenses/MIT)
 
 ## Contributing
 
