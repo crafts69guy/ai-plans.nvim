@@ -2,6 +2,8 @@
 
 A Telescope extension for browsing, previewing, and managing AI-generated plan files (Claude, ChatGPT, etc.).
 
+![introduce](./images/introduce.png)
+
 ## Features
 
 - **Fuzzy search** through all AI plan markdown files
@@ -135,6 +137,8 @@ use {
 | `<C-d>`   | Scroll preview down                           |
 | `<C-u>`   | Scroll preview up                             |
 | `<CR>`    | Smart open (zen mode if enabled, else normal) |
+
+![ripgrep](./images/preview-rg.png)
 
 ## Configuration
 
