@@ -46,7 +46,30 @@ A Telescope extension for browsing, previewing, and managing AI-generated plan f
     "nvim-lua/plenary.nvim",
   },
   keys = {
-    { "<C-A-p>", "<cmd>Telescope ai_plans<cr>", desc = "AI Plans" },
+   {
+    "<C-A-p>",
+    function()
+     require("telescope").extensions.ai_plans.ai_plans()
+    end,
+    desc = "AI Plans",
+    mode = "n",
+   },
+   {
+    "<leader>aP",
+    function()
+     require("telescope").extensions.ai_plans.ai_plans()
+    end,
+    desc = "Browse AI Plans",
+    mode = "n",
+   },
+   {
+    "<leader>aG",
+    function()
+     require("telescope").extensions.ai_plans.grep()
+    end,
+    desc = "Search AI Plans",
+    mode = "n",
+   },
   },
   opts = {
     sources = {
